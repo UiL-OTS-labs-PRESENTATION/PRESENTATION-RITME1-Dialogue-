@@ -1,0 +1,447 @@
+ 	term.print("pcl script output starts here:\n");
+
+	# Description: Program reads and presents a set of .wav files and markers.
+	# by Petra van Alphen (p.m.vanalphen@uva.nl). Adapted version of Speech_x
+	# by Doug Davidson (doug.davidson@fcdonders.ru.nl)
+	# 2012 modified by Anne van Leeuwen (a.r.vanleeuwen1@uu.nl)
+	# 2014 modified by Anne van Leeuwen (a.r.vanleeuwen@uu.nl)
+	# 2014 modified by Christian Straman (c.r.straman@uu.nl) 28_01_2014
+	
+
+	# Use Mixer DirectXHardware for correct timing wav files!!
+
+	# ################################################################
+	# Setup and initialize variables
+	# ################################################################
+
+	# Set up output_port
+	#if (output_port_manager.port_count() == 0) then
+	#   term.print( "Forgot to add an output port!" )
+	#end;
+#	output_port port = output_port_manager.get_port( 1 );
+
+	# ################################################################
+	# Read in stimulus-related information
+	# ################################################################
+
+	# Read stimulus file name list from a file
+
+	# the one we use for determination of number of stimuli inside.
+	input_file file_detect_len = new input_file;
+
+	#the one we use for reading the actual experiment stimuli
+	input_file in = new input_file;
+	int ThatManyTrials=0;
+	int i_stmfile = 0;  
+
+
+	#in.open("U:\\My Documents\\Desktop\\rhythm_exp\\stimuli\\voorbeeldtxt.txt");
+	string voorbeeldfile= "D:\\users\\anne\\ritme-exp2\\stimuli\\lijstA_1a.txt";
+	string AbsPath = "D:\\users\\anne\\ritme-exp2\\stimuli\\";
+#	file_detect_len.set_filename( voorbeeldfile );
+	if (file_exists(voorbeeldfile)) then
+		term.print("file " + voorbeeldfile + " exists, opening it\n");
+		file_detect_len.open(voorbeeldfile);
+	end;
+
+	in.set_delimiter( '\t' );
+	in.open("stimuli\\lijstA_1a.txt");
+
+	#D:\AnneVanLeeuwenRitmeExperiment\ritme-exp\stimuli
+
+	#file_detect_len.set_delimiter( '\t' );
+	#in.set_delimiter( '\t' );
+	 
+	# This is a hack to get the length of the list 
+	#int i_stmfile = 0;  # Counter for (text) stimulus file
+	#loop until
+	#   file_detect_len.end_of_file() || i_stmfile == 1000 || !file_detect_len.last_succeeded()
+	#begin
+	#   i_stmfile = i_stmfile + 1;   
+	#end;
+
+	# newline is the default delimeter character, but set it anay way, just to be sure.
+	file_detect_len.set_delimiter( '\n' );
+
+	loop
+		i_stmfile = 0;  
+		ThatManyTrials=0;
+		# Counter for number of trial lines (or wav files) available in the stimulus file
+	until
+		#file_detect_len.end_of_file() || !file_detect_len.last_succeeded()
+		file_detect_len.end_of_file()
+	begin
+		i_stmfile = i_stmfile + 1;   
+		term.print("\nscanning line "+ string(i_stmfile)+":\n");
+		term.print(file_detect_len.get_line())
+	#  i_stmfile = i_stmfile + 1;   
+	end;
+
+
+
+
+
+	if (file_detect_len.end_of_file()) then
+		term.print("detected end of file\n")
+	else
+		term.print("not yet end of file\n")
+	end;	
+
+	if (!file_detect_len.last_succeeded()) then
+		term.print("file reading failed, some error\n")
+	else
+		term.print("file reading still okay\n")
+	end;	
+
+	ThatManyTrials = i_stmfile;
+
+	term.print("have just detected " +string(ThatManyTrials) + " trials/wavfiles in the examplefile:\n");
+
+
+	#term.print( string_value + " " + string(bool_value) + " " + string(double_value) + " " + string(int_value));
+
+
+	# filepointer could possible be anywhere inside the file, depending on which condition ended the loop above
+	# so better close this testfile file and reopen the file, we will end up at the beginning again.
+	file_detect_len.close();
+
+	int lab1;
+	int lab2;
+	int lab3; 
+	int lab4;
+	int lab5;
+	#int lab6;
+	int lab7;
+	int lab8; 
+	int lab9;
+	int lab10;
+	int lab11; 
+	int lab12;
+	int lab13;
+
+
+	# Set up a vector of .wav file names using the length
+	array <int> cond[ThatManyTrials];
+	array <int> ioi[ThatManyTrials];
+	array <int> itemnr[ThatManyTrials];
+	array <int> bloknr[ThatManyTrials];
+	array <int> expcode[ThatManyTrials];
+	array <int> onebt[ThatManyTrials];
+	array <int> twobt[ThatManyTrials];
+	array <int> threebt[ThatManyTrials];
+	array <int> fourbt[ThatManyTrials];
+	array <int> fivebt[ThatManyTrials];
+	#array <int> endA [ThatManyTrials];
+	array <int> startB [ThatManyTrials];
+	array <int> Cbt[ThatManyTrials];
+	array <int> sevenbt[ThatManyTrials];
+	array <int> eightbt[ThatManyTrials];
+	array <int> ninebt[ThatManyTrials];
+	array <int> tenbt[ThatManyTrials];
+	array <int> endwav [ThatManyTrials];
+	array <string> wavfile[ThatManyTrials];
+	array <int> speaker1[ThatManyTrials];
+	array <int> speaker2[ThatManyTrials];
+
+
+int playretcode;
+
+	# Now read in the actual filenames and all timing info from the file
+	loop
+		i_stmfile = 0;  # Counter for (text) stimulus file
+	until
+		in.end_of_file() || i_stmfile == ThatManyTrials || !in.last_succeeded()
+	begin
+		i_stmfile = i_stmfile + 1;		
+		term.print("performing readloop nr: " +string(i_stmfile) + "\n");
+		#01
+		cond[i_stmfile] = in.get_int();			
+		#02
+		ioi[i_stmfile] = in.get_int();			
+		#03
+		itemnr[i_stmfile] = in.get_int();		
+		#04
+		bloknr[i_stmfile] = in.get_int();		
+		#05
+		expcode[i_stmfile] = in.get_int();		
+		term.print("have read expcode: " +string(expcode[i_stmfile]) + "   for listindex\:" +string(i_stmfile)+"\n" );
+
+		#06
+		onebt[i_stmfile] = in.get_int();			
+		#07
+		twobt[i_stmfile] = in.get_int();			
+		#08
+		threebt[i_stmfile] = in.get_int();		
+		#09
+		fourbt[i_stmfile] = in.get_int();		
+		#10
+		fivebt[i_stmfile] = in.get_int();		
+		#11
+		#endA [i_stmfile] = in.get_int();			
+		#12
+		startB [i_stmfile] = in.get_int();		
+		#13
+		Cbt[i_stmfile] = in.get_int();			
+		#14
+		sevenbt[i_stmfile] = in.get_int();		
+		#15
+		eightbt[i_stmfile] = in.get_int();		
+		#16
+		ninebt[i_stmfile] = in.get_int();		
+		#17
+		tenbt[i_stmfile] = in.get_int();			
+		#18
+		endwav [i_stmfile] = in.get_int();		
+		#19
+		wavfile[i_stmfile] = in.get_string();	
+		#20
+		speaker1[i_stmfile] = in.get_int();		
+		#21
+		speaker2[i_stmfile] = in.get_int()		
+	end;
+
+	if (in.end_of_file()) then
+		term.print("have reached end of the file, closing file\n")
+	else if (i_stmfile == ThatManyTrials) then
+		term.print("have processed settings from "+ string(ThatManyTrials)+ " trials/wav files, closing file\n")
+	else
+		term.print("some error, closing file\n")
+	end;
+
+	# Close the file
+	in.close();
+
+
+	# ################################################################
+	# Main trial definition
+	# ################################################################
+
+	# First present starting screen
+	# list which trails you want to do
+	#startexp1.present();
+	startexp2.present();
+	startexp3.present();
+	startexp4.present();
+	payattention.present();
+	 
+	string f;
+	int j = 1;
+
+	# Present the main sequence for this series
+	pauzes.shuffle();		
+#	loop
+#	until
+#		j > pauzes.count()
+#	begin
+	
+	loop
+		int i_trial = 1
+	until
+		i_trial > ThatManyTrials
+	begin
+		term.print("handling trial nr: "+ string(i_trial) + "\n");
+		# Set the filename and load it
+		f = wavfile[i_trial] + ".wav";
+		term.print("setting next filename = "+ f+"\n");
+
+		s.set_filename( f );  
+		if (file_exists(AbsPath + f)) then
+			term.print("will try loading file: "+ AbsPath+f +"\n");
+			s.load();
+			term.print("have loaded file: "+ f+"\n");
+		 
+			# Set integer variables
+			# split this up:  declaration once, filling each loop:
+			lab1 = onebt[i_trial];
+			lab2 = twobt[i_trial]-onebt[i_trial];
+			lab3 = threebt [i_trial]-twobt[i_trial]; 
+			lab4 = fourbt[i_trial]-threebt [i_trial];
+			lab5 = fivebt[i_trial]-fourbt[i_trial];
+			#lab6 = endA [i_trial]-fivebt[i_trial];
+			lab7 = startB [i_trial]-fivebt [i_trial];
+			lab8 = Cbt [i_trial]-startB [i_trial]; 
+			lab9 = sevenbt[i_trial]-Cbt [i_trial];
+			lab10 = eightbt[i_trial]-sevenbt[i_trial];
+			lab11 = ninebt [i_trial]-eightbt[i_trial]; 
+			lab12 = tenbt[i_trial]-ninebt [i_trial];
+			lab13 = endwav[i_trial]-tenbt[i_trial];
+
+			term.print("have set lab1 = " + string(lab1) + "\n");
+			term.print("have set lab2 = " + string(lab2) + "\n");
+			term.print("have set lab3 = " + string(lab3) + "\n");
+			term.print("have set lab4 = " + string(lab4) + "\n");
+			term.print("have set lab5 = " + string(lab5) + "\n");
+			#term.print("have set lab6 = " + string(lab6) + "\n");
+			term.print("have set lab7 = " + string(lab7) + "\n");
+			term.print("have set lab8 = " + string(lab8) + "\n");
+			term.print("have set lab9 = " + string(lab9) + "\n");
+			term.print("have set lab10 = " + string(lab10) + "\n");
+			term.print("have set lab11 = " + string(lab11) + "\n");
+			term.print("have set lab12 = " + string(lab12) + "\n");
+			term.print("have set lab13 = " + string(lab13) + "\n");
+			
+			# Set the .wav as the current stm and write wav-name to eventcode (contrains condition, speaker A+B, itemA+B, ioi)
+			# for the portcodes: writes itemnr to portcode at onset wav-file
+			wavevent.set_stimulus( snd ); 
+			wavevent.set_event_code(wavfile[i_trial]);
+#			wavevent.set_port_code (itemnr[i_trial]);
+			
+			# Set the delay time for nothing event (= 13 critical markers)
+			eventlab1.set_deltat (lab1);
+			eventlab2.set_deltat (lab2);
+			eventlab3.set_deltat (lab3); 
+			eventlab4.set_deltat (lab4);
+			eventlab5.set_deltat (lab5);
+			#eventlab6.set_deltat (lab6); 
+			eventlab7.set_deltat (lab7);
+			eventlab8.set_deltat (lab8);
+			eventlab9.set_deltat (lab9); 
+			eventlab10.set_deltat (lab10);
+			eventlab11.set_deltat (lab11);
+			eventlab12.set_deltat (lab12);
+			eventlab13.set_deltat (lab13);
+			term.print("have set delta T's\n");
+
+			#sends out blocknr on first fixation cross	
+			event0.set_event_code (string (bloknr[i_trial]+140));
+#			event0.set_port_code (bloknr[i_trial]+140);
+
+			# sends out ioi to port code on first beat speaker A, 99=525, 98=425
+			if (ioi[i_trial]==425) then
+#				eventlab1.set_port_code (98);	
+				eventlab1.set_event_code("98");
+				term.print("ioi == 425, setting code 98\n");
+			end;
+			
+			if (ioi[i_trial]==525) then
+#				eventlab1.set_port_code (99);	
+				eventlab1.set_event_code("99");
+				term.print("ioi == 525, setting code 99\n");
+			end;
+
+#			eventlab2.set_port_code (speaker1[i_trial]+160);
+#			eventlab3.set_port_code (speaker2[i_trial]+180);
+				
+			# set codes for different conditions
+			if (cond[i_trial]==1) then
+#				eventlab7.set_port_code (201);
+				eventlab7.set_event_code("201");
+#				eventlab8.set_port_code (211);
+				eventlab8.set_event_code("211");
+#				eventlab9.set_port_code (221);
+				eventlab9.set_event_code("221");
+#				eventlab10.set_port_code (231);
+				eventlab10.set_event_code("231");
+#				eventlab11.set_port_code (241);
+				eventlab11.set_event_code("241");
+#				eventlab12.set_port_code (251);
+				eventlab12.set_event_code("251");
+#				eventlab13.set_port_code (191);
+				eventlab13.set_event_code("191");
+				term.print("cond == 1, setting codelist 201,211,231,251,...\n")
+			end;
+			if (cond[i_trial]==2) then
+#				eventlab7.set_port_code (202);
+				eventlab7.set_event_code("202");
+#				eventlab8.set_port_code (212);
+				eventlab8.set_event_code("212");
+#				eventlab9.set_port_code (222);
+				eventlab9.set_event_code("222");
+#				eventlab10.set_port_code (232);
+				eventlab10.set_event_code("232");
+#				eventlab11.set_port_code (242);
+				eventlab11.set_event_code("242");
+#				eventlab12.set_port_code (252);
+				eventlab12.set_event_code("252");
+#				eventlab13.set_port_code (192);
+				eventlab13.set_event_code("192");
+				term.print("cond == 2, setting codelist 202,212,232,252,...\n")
+			end;
+			if (cond[i_trial]==3) then
+#				eventlab7.set_port_code (203);
+				eventlab7.set_event_code("203");
+#				eventlab8.set_port_code (213);
+				eventlab8.set_event_code("213");
+#				eventlab9.set_port_code (223);
+				eventlab9.set_event_code("223");
+#				eventlab10.set_port_code (233);
+				eventlab10.set_event_code("233");
+#				eventlab11.set_port_code (243);
+				eventlab11.set_event_code("243");
+#				eventlab12.set_port_code (253);
+				eventlab12.set_event_code("253");
+#				eventlab13.set_port_code (193);
+				eventlab13.set_event_code("193");
+				term.print("cond == 3, setting codelist 203,213,233,253,...\n")
+			end;
+
+			# Play the .wav    
+				term.print("playing the wav now...\n");
+			trial_black.present();
+			playsent.present();
+			#term.print("wavplay returned:" +string(playretcode)+ "    ....trial : " + string (i_trial)+ " +  f + " \n");
+			
+				term.print("trial_fix present...\n");
+		#	trial_fix.present();
+			trial_black.present();
+			#term.print("trial_vraag1 present...\n");
+			#trial_vraag1.present();
+			#	term.print("trial_vraag2 present...\n");
+			#trial_vraag2.present();
+			term.print("trial_vraag3 present...\n");
+			trial_vraag3.present();
+			int button1 = stimulus_manager.last_stimulus_data().button();	#send response code as trigger
+#			port.send_code(button1);
+
+			# End of practice	
+			if (expcode[i_trial]== 1) then
+				term.print("expcode ==1...\n");
+				endpractice.present();
+				starttest.present();
+				payattention.present();
+				#s.unload();
+				#i_trial = i_trial + 1; 
+			end;
+	
+			if (expcode[i_trial]== 3) then
+				term.print("expcode ==3...\n");
+				event_pauze.set_stimulus( pauzes[j]);				# set the stimulus of the trial		
+				int code_desc = int (pauzes[j].description());
+#				event_pauze.set_port_code (code_desc);
+				trial_pauze.present();
+				trial_pauze2.present();
+				payattention.present();
+				if (j < pauzes.count()) then
+					j = j+1;
+				else
+					j=1;	
+					term.print("Have shown all available pause-pictures, starting at 1 again..\n");
+				end;	
+				#s.unload();
+				#i_trial = i_trial + 1; 
+			end;	
+		
+			if (expcode[i_trial]==99) then
+				# End of experiment
+				term.print("expcode ==99...make sure this code is last in the list!!!\n");
+				endexp.present();
+			end;
+			
+#			if (expcode[i_trial]==0) then
+#				term.print("expcode ==0...\n");
+			s.unload();
+			i_trial = i_trial + 1;
+#			end; 						
+		
+		else
+			term.print("file: "+ AbsPath+f +" does not seem to exist, !?\n");
+			# term.print("reading past the end of the table, no more files: "+ f+"\n");
+			# if this trial/line has no wav associated with it, advance to the next trial
+			term.print("can you see this line !?\n");
+			i_trial = i_trial + 1; 
+		
+		end;
+	end;
+	#end;
+end;
+      
